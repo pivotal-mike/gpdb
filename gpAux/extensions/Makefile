@@ -15,13 +15,13 @@ ifneq (${ENV_JAVA_HOME},)
 	JAVA_HOME=${ENV_JAVA_HOME}
 endif
 
-.PHONY: all install clean distclean installcheck mapreduce pxf gpcloud gphdfs mkgphdfs mkorafce
+.PHONY: all install clean distclean installcheck mapreduce pxf gpcloud gphdfs mkgphdfs mkorafce orafce
 
 #
 # targets built via top_builddir/GNUmakefile
 #
 
-all: mapreduce gpcloud pxf gphdfs
+all: mapreduce gpcloud pxf gphdfs orafce
 
 mapreduce:
 	@if [ "$(enable_mapreduce)" = "yes" ]; then \
@@ -48,6 +48,12 @@ gphdfs:
 		$(MAKE) -C gphdfs; \
 	fi
 
+orafce:
+	@if [ "$(enable_orafce)" = "yes" ]; then \
+		echo "orafce enabled"; \
+		$(MAKE) -C orafce; \
+	fi
+
 install:
 	@if [ "$(enable_mapreduce)" = "yes" ]; then \
 		$(MAKE) -C gpmapreduce install; \
@@ -62,27 +68,33 @@ install:
 	@if [ "$(enable_gphdfs)" = "yes" ]; then \
 		$(MAKE) -C gphdfs docdir=$(INSTLOC)/docs install; \
 	fi
+	@if [ "$(enable_orafce)" == "yes" ]; then \
+		$(MAKE) -C orafce install; \
+	fi
 
 clean:
 	if [ "$(enable_mapreduce)" = "yes" ]; then $(MAKE) -C gpmapreduce clean; fi
 	if [ "$(enable_gpcloud)" = "yes" ]; then $(MAKE) -C gpcloud cleanall; fi
 	if [ "$(enable_pxf)" = "yes" ]; then $(MAKE) -C pxf clean; fi
 	if [ "$(enable_gphdfs)" = "yes" ]; then $(MAKE) -C gphdfs clean; fi
+	if [ "${enable_orafce}" = "yes" ]; then $(MAKE) -C orafce; fi
 
 distclean:
 	if [ "$(enable_mapreduce)" = "yes" ]; then $(MAKE) -C gpmapreduce distclean; fi
 	if [ "$(enable_gpcloud)" = "yes" ]; then $(MAKE) -C gpcloud distclean; fi
 	if [ "$(enable_pxf)" = "yes" ]; then $(MAKE) -C pxf distclean; fi
 	if [ "$(enable_gphdfs)" = "yes" ]; then $(MAKE) -C gphdfs distclean; fi
+	if [ "${enable_orafce}" = "yes" ]; then $(MAKE) -C orafce; fi
 
 installcheck:
 	if [ -d "$(ext_dir)" ]; then \
-		PATH=$(INSTLOC)/bin:$(PATH) $(MAKE) -C orafce installcheck USE_PGXS=1 && \
+#		PATH=$(INSTLOC)/bin:$(PATH) $(MAKE) -C orafce installcheck USE_PGXS=1 && \
 		PATH=$(INSTLOC)/bin:$(PATH) $(MAKE) -C gphdfs installcheck USE_PGXS=1 ; \
 	fi; \
 	if [ "$(enable_mapreduce)" = "yes" ]; then \
 		$(MAKE) -C gpmapreduce installcheck; \
 	fi
+	if [ "$(enable_orafce)" == "yes" ]; then $(MAKE) -C orafce installcheck; fi
 
 unittest-check:
 	@if [ "$(enable_pxf)" = "yes" ]; then \
